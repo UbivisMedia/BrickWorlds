@@ -1,0 +1,63 @@
+# CMake
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# Build artifacts
+*.o
+*.obj
+*.exe
+*.out
+*.app
+*.so
+*.dll
+*.dylib
+*.a
+*.lib
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Visual Studio
+.vs/
+*.user
+*.aps
+*.pch
+*.vspscc
+*.vssscc
+*.suo
+*.sln.docstates
+*.sln.DotSettings.user
+ipch/
+*.VC.db
+*.VC.opendb
+
+# Debug/Release folders
+Debug/
+Release/
+x64/
+x86/
+out/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+
+# Package managers
+conan/
+vcpkg_installed/
