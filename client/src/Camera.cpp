@@ -25,7 +25,6 @@ void Camera::setRotation(float pitch, float yaw) {
     m_pitch = pitch;
     m_yaw = yaw;
 
-    // Constrain pitch
     if (m_pitch > 89.0f) m_pitch = 89.0f;
     if (m_pitch < -89.0f) m_pitch = -89.0f;
 
@@ -40,7 +39,6 @@ void Camera::rotate(float pitchDelta, float yawDelta) {
     m_pitch += pitchDelta;
     m_yaw += yawDelta;
 
-    // Constrain pitch
     if (m_pitch > 89.0f) m_pitch = 89.0f;
     if (m_pitch < -89.0f) m_pitch = -89.0f;
 
@@ -48,22 +46,20 @@ void Camera::rotate(float pitchDelta, float yawDelta) {
 }
 
 void Camera::updateVectors() {
-    float pitchRad = m_pitch * M_PI / 180.0f;
-    float yawRad = m_yaw * M_PI / 180.0f;
+    float pitchRad = static_cast<float>(m_pitch * M_PI / 180.0);
+    float yawRad = static_cast<float>(m_yaw * M_PI / 180.0);
 
-    m_forward.x = cos(yawRad) * cos(pitchRad);
-    m_forward.y = sin(pitchRad);
-    m_forward.z = sin(yawRad) * cos(pitchRad);
+    m_forward.x = std::cos(yawRad) * std::cos(pitchRad);
+    m_forward.y = std::sin(pitchRad);
+    m_forward.z = std::sin(yawRad) * std::cos(pitchRad);
     m_forward = m_forward.normalized();
 
-    // Right = forward x worldUp
     BrickWorlds::Core::Vector3f worldUp(0.0f, 1.0f, 0.0f);
     m_right.x = m_forward.y * worldUp.z - m_forward.z * worldUp.y;
     m_right.y = m_forward.z * worldUp.x - m_forward.x * worldUp.z;
     m_right.z = m_forward.x * worldUp.y - m_forward.y * worldUp.x;
     m_right = m_right.normalized();
 
-    // Up = right x forward
     m_up.x = m_right.y * m_forward.z - m_right.z * m_forward.y;
     m_up.y = m_right.z * m_forward.x - m_right.x * m_forward.z;
     m_up.z = m_right.x * m_forward.y - m_right.y * m_forward.x;
@@ -79,14 +75,12 @@ BrickWorlds::Core::Vector3f Camera::getRight() const {
 }
 
 void Camera::getViewMatrix(float* out) const {
-    // LookAt matrix
     BrickWorlds::Core::Vector3f center = m_position + m_forward;
 
     BrickWorlds::Core::Vector3f f = (center - m_position).normalized();
     BrickWorlds::Core::Vector3f r = m_right;
     BrickWorlds::Core::Vector3f u = m_up;
 
-    // Column-major order for OpenGL
     out[0] = r.x; out[4] = r.y; out[8] = r.z;   out[12] = -(r.x * m_position.x + r.y * m_position.y + r.z * m_position.z);
     out[1] = u.x; out[5] = u.y; out[9] = u.z;   out[13] = -(u.x * m_position.x + u.y * m_position.y + u.z * m_position.z);
     out[2] = -f.x; out[6] = -f.y; out[10] = -f.z; out[14] = (f.x * m_position.x + f.y * m_position.y + f.z * m_position.z);
@@ -94,8 +88,7 @@ void Camera::getViewMatrix(float* out) const {
 }
 
 void Camera::getProjectionMatrix(float* out) const {
-    // Perspective projection matrix
-    float tanHalfFov = tan((m_fov * M_PI / 180.0f) / 2.0f);
+    float tanHalfFov = std::tan(static_cast<float>((m_fov * M_PI / 180.0) / 2.0));
 
     for (int i = 0; i < 16; i++) out[i] = 0.0f;
 
