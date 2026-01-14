@@ -3,8 +3,27 @@ project(BrickWorlds_Client)
 # Find OpenGL
 find_package(OpenGL REQUIRED)
 
-# Find GLEW
-find_package(GLEW REQUIRED)
+# Find or fetch GLEW
+find_package(GLEW QUIET)
+if(NOT GLEW_FOUND)
+    message(STATUS "GLEW not found, fetching from GitHub...")
+    include(FetchContent)
+    FetchContent_Declare(
+        glew
+        URL https://github.com/nigels-com/glew/releases/download/glew-2.3.0/glew-2.3.0.zip
+    )
+    
+    set(BUILD_UTILS OFF CACHE BOOL "" FORCE)
+    
+    FetchContent_GetProperties(glew)
+    if(NOT glew_POPULATED)
+        FetchContent_Populate(glew)
+        add_subdirectory(${glew_SOURCE_DIR}/build/cmake ${glew_BINARY_DIR})
+    endif()
+    
+    # Set GLEW targets
+    add_library(GLEW::GLEW ALIAS glew_s)
+endif()
 
 # Find or fetch GLFW
 find_package(glfw3 QUIET)
@@ -40,3 +59,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 message(STATUS "Configured Client executable")
+
