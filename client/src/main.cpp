@@ -10,11 +10,12 @@ using namespace BrickWorlds::Core;
 
 struct InputState {
     bool keys[512] = { false };
-    double lastMouseX = 0.0;
-    double lastMouseY = 0.0;
+    double lastMouseX = 640.0;
+    double lastMouseY = 360.0;
     bool firstMouse = true;
-    float mouseSensitivity = 0.1f;
+    float mouseSensitivity = 0.05f;  // <- Von 0.1f auf 0.05f reduziert
 } g_input;
+
 
 static void error_callback(int error, const char* description) {
     std::cerr << "GLFW Error " << error << ": " << description << std::endl;
@@ -35,36 +36,54 @@ static void mouse_callback(GLFWwindow*, double xpos, double ypos) {
         g_input.lastMouseX = xpos;
         g_input.lastMouseY = ypos;
         g_input.firstMouse = false;
+        return;
     }
 
     double xoffset = xpos - g_input.lastMouseX;
-    double yoffset = g_input.lastMouseY - ypos;
+    double yoffset = g_input.lastMouseY - ypos; // Reversed
+
     g_input.lastMouseX = xpos;
     g_input.lastMouseY = ypos;
+
 }
 
+
+
 void processInput(Camera& camera, float deltaTime) {
-    float moveSpeed = 10.0f * deltaTime;
+    float moveSpeed = 15.0f * deltaTime;  // Erhöht von 10.0f auf 15.0f
+    bool moved = false;
 
     if (g_input.keys[GLFW_KEY_W]) {
         camera.move(camera.getForward() * moveSpeed);
+        moved = true;
     }
     if (g_input.keys[GLFW_KEY_S]) {
         camera.move(camera.getForward() * (-moveSpeed));
+        moved = true;
     }
     if (g_input.keys[GLFW_KEY_A]) {
         camera.move(camera.getRight() * (-moveSpeed));
+        moved = true;
     }
     if (g_input.keys[GLFW_KEY_D]) {
         camera.move(camera.getRight() * moveSpeed);
+        moved = true;
     }
     if (g_input.keys[GLFW_KEY_SPACE]) {
         camera.move(Vector3f(0.0f, moveSpeed, 0.0f));
+        moved = true;
     }
     if (g_input.keys[GLFW_KEY_LEFT_SHIFT]) {
         camera.move(Vector3f(0.0f, -moveSpeed, 0.0f));
+        moved = true;
+    }
+
+    if (moved) {
+        auto pos = camera.getPosition();
+        std::cout << "Camera pos: (" << pos.x << ", " << pos.y << ", " << pos.z << ")\r" << std::flush;
     }
 }
+
 
 int main(int argc, char* argv[]) {
     std::cout << "BrickWorlds Client v" << BrickWorlds::Version::GetVersionString() << std::endl;
@@ -118,19 +137,64 @@ int main(int argc, char* argv[]) {
     }
 
     Camera camera(70.0f, 1280.0f / 720.0f);
-    camera.setPosition(Vector3f(32.0f, 15.0f, 32.0f));
-    camera.setRotation(0.0f, -45.0f);
+    camera.setPosition(Vector3f(32.0f, 20.0f, 50.0f));
+    camera.setRotation(0.0f, 180.0f);  // Geradeaus schauen
 
     std::cout << "\nControls:" << std::endl;
     std::cout << "  WASD - Move" << std::endl;
     std::cout << "  Mouse - Look around" << std::endl;
-    std::cout << "  Space - Up" << std::endl;
-    std::cout << "  Shift - Down" << std::endl;
+    std::cout << "  Space - Up, Shift - Down" << std::endl;
     std::cout << "  ESC - Exit" << std::endl;
-    std::cout << "\nRendering..." << std::endl;
+    std::cout << "\nRendering...\n" << std::endl;
+
+    // Lambda mit Kamera-Capture
+    auto mouseCallback = [&camera](GLFWwindow*, double xpos, double ypos) {
+        if (g_input.firstMouse) {
+            g_input.lastMouseX = xpos;
+            g_input.lastMouseY = ypos;
+            g_input.firstMouse = false;
+            return;
+        }
+
+        double xoffset = xpos - g_input.lastMouseX;
+        double yoffset = g_input.lastMouseY - ypos;
+
+        g_input.lastMouseX = xpos;
+        g_input.lastMouseY = ypos;
+
+        // Direkt rotieren
+        camera.rotate(
+            static_cast<float>(yoffset * g_input.mouseSensitivity),
+            static_cast<float>(xoffset * g_input.mouseSensitivity)
+        );
+        };
+
+    // Callback setzen mit std::function Wrapper
+    // Für C-API müssen wir einen Workaround machen
+    glfwSetWindowUserPointer(window, &camera);
+    glfwSetCursorPosCallback(window, [](GLFWwindow* win, double xpos, double ypos) {
+        Camera* cam = static_cast<Camera*>(glfwGetWindowUserPointer(win));
+
+        if (g_input.firstMouse) {
+            g_input.lastMouseX = xpos;
+            g_input.lastMouseY = ypos;
+            g_input.firstMouse = false;
+            return;
+        }
+
+        double xoffset = xpos - g_input.lastMouseX;
+        double yoffset = g_input.lastMouseY - ypos;
+
+        g_input.lastMouseX = xpos;
+        g_input.lastMouseY = ypos;
+
+        cam->rotate(
+            static_cast<float>(yoffset * g_input.mouseSensitivity),
+            static_cast<float>(xoffset * g_input.mouseSensitivity)
+        );
+        });
 
     double lastTime = glfwGetTime();
-    double lastMouseUpdateTime = lastTime;
 
     while (!glfwWindowShouldClose(window)) {
         double currentTime = glfwGetTime();
@@ -138,24 +202,15 @@ int main(int argc, char* argv[]) {
         lastTime = currentTime;
 
         processInput(camera, deltaTime);
-
-        // Mouse look (limit update rate to avoid jitter)
-        if (currentTime - lastMouseUpdateTime > 0.016) {
-            if (!g_input.firstMouse) {
-                double xoffset = g_input.lastMouseX - 640.0;
-                double yoffset = g_input.lastMouseY - 360.0;
-
-                camera.rotate(static_cast<float>(-yoffset * g_input.mouseSensitivity),
-                    static_cast<float>(xoffset * g_input.mouseSensitivity));
-            }
-            lastMouseUpdateTime = currentTime;
-        }
-
         renderer.render(world, camera);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+
+
+
 
     glfwDestroyWindow(window);
     glfwTerminate();
