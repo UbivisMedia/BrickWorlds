@@ -3,31 +3,24 @@
 #include "Camera.h"
 #include "Renderer.h"
 #include <iostream>
-#define GLFW_INCLUDE_NONE
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-#ifdef _WIN32
-#include <windows.h>
-#include <GL/gl.h>
-#elif defined(__linux__)
-#include <GL/gl.h>
-#endif
 
 using namespace BrickWorlds::Core;
 
-// Input state
 struct InputState {
     bool keys[512] = { false };
     double lastMouseX = 0.0;
     double lastMouseY = 0.0;
     bool firstMouse = true;
+    float mouseSensitivity = 0.1f;
 } g_input;
 
 static void error_callback(int error, const char* description) {
     std::cerr << "GLFW Error " << error << ": " << description << std::endl;
 }
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+static void key_callback(GLFWwindow* window, int key, int, int action, int) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, 1);
     }
@@ -37,7 +30,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 }
 
-static void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+static void mouse_callback(GLFWwindow*, double xpos, double ypos) {
     if (g_input.firstMouse) {
         g_input.lastMouseX = xpos;
         g_input.lastMouseY = ypos;
@@ -45,11 +38,9 @@ static void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     }
 
     double xoffset = xpos - g_input.lastMouseX;
-    double yoffset = g_input.lastMouseY - ypos; // Reversed
+    double yoffset = g_input.lastMouseY - ypos;
     g_input.lastMouseX = xpos;
     g_input.lastMouseY = ypos;
-
-    // Apply to camera later in main loop
 }
 
 void processInput(Camera& camera, float deltaTime) {
@@ -79,16 +70,16 @@ int main(int argc, char* argv[]) {
     std::cout << "BrickWorlds Client v" << BrickWorlds::Version::GetVersionString() << std::endl;
     std::cout << "Initializing 3D rendering system..." << std::endl;
 
-    // Initialize GLFW
     glfwSetErrorCallback(error_callback);
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW!" << std::endl;
         return -1;
     }
 
-    // Create window
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     GLFWwindow* window = glfwCreateWindow(1280, 720, "BrickWorlds - Phase 1 MVP (3D)", NULL, NULL);
     if (!window) {
         std::cerr << "Failed to create GLFW window!" << std::endl;
@@ -98,17 +89,27 @@ int main(int argc, char* argv[]) {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+
+    // Initialize GLEW
+    glewExperimental = GL_TRUE;
+    GLenum glewError = glewInit();
+    if (glewError != GLEW_OK) {
+        std::cerr << "Failed to initialize GLEW: " << glewGetErrorString(glewError) << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+
+    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // Create world
     World world;
     std::cout << "Generating flat test world..." << std::endl;
     world.generateFlatWorld(4, 4);
     std::cout << "World generated with " << world.getChunks().size() << " chunks" << std::endl;
 
-    // Initialize renderer
     Renderer renderer;
     if (!renderer.initialize()) {
         std::cerr << "Failed to initialize renderer!" << std::endl;
@@ -116,7 +117,6 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    // Create camera
     Camera camera(70.0f, 1280.0f / 720.0f);
     camera.setPosition(Vector3f(32.0f, 15.0f, 32.0f));
     camera.setRotation(0.0f, -45.0f);
@@ -129,22 +129,28 @@ int main(int argc, char* argv[]) {
     std::cout << "  ESC - Exit" << std::endl;
     std::cout << "\nRendering..." << std::endl;
 
-    // Main loop
     double lastTime = glfwGetTime();
+    double lastMouseUpdateTime = lastTime;
+
     while (!glfwWindowShouldClose(window)) {
         double currentTime = glfwGetTime();
         float deltaTime = static_cast<float>(currentTime - lastTime);
         lastTime = currentTime;
 
-        // Process input
         processInput(camera, deltaTime);
 
-        // Update mouse look
-        if (!g_input.firstMouse) {
-            // Mouse sensitivity is handled in the mouse_callback
+        // Mouse look (limit update rate to avoid jitter)
+        if (currentTime - lastMouseUpdateTime > 0.016) {
+            if (!g_input.firstMouse) {
+                double xoffset = g_input.lastMouseX - 640.0;
+                double yoffset = g_input.lastMouseY - 360.0;
+
+                camera.rotate(static_cast<float>(-yoffset * g_input.mouseSensitivity),
+                    static_cast<float>(xoffset * g_input.mouseSensitivity));
+            }
+            lastMouseUpdateTime = currentTime;
         }
 
-        // Render
         renderer.render(world, camera);
 
         glfwSwapBuffers(window);
@@ -157,4 +163,3 @@ int main(int argc, char* argv[]) {
     std::cout << "\nShutdown complete." << std::endl;
     return 0;
 }
-

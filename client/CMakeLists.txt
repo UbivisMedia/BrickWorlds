@@ -1,12 +1,10 @@
 project(BrickWorlds_Client)
 
-file(GLOB_RECURSE CLIENT_SOURCES "src/*.cpp")
-
-add_executable(${PROJECT_NAME} ${CLIENT_SOURCES})
-
-target_link_libraries(${PROJECT_NAME} PRIVATE BrickWorlds_Shared OpenGL::GL glfw)
 # Find OpenGL
 find_package(OpenGL REQUIRED)
+
+# Find GLEW
+find_package(GLEW REQUIRED)
 
 # Find or fetch GLFW
 find_package(glfw3 QUIET)
@@ -24,6 +22,16 @@ if(NOT glfw3_FOUND)
     FetchContent_MakeAvailable(glfw)
 endif()
 
+file(GLOB_RECURSE CLIENT_SOURCES "src/*.cpp")
+
+add_executable(${PROJECT_NAME} ${CLIENT_SOURCES})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    BrickWorlds_Shared 
+    OpenGL::GL
+    GLEW::GLEW
+    glfw
+)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
