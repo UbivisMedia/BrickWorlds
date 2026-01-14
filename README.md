@@ -6,7 +6,7 @@
 
 ## 🎯 Projektstatus
 
-Das Projekt befindet sich in **Phase 0 - Planung & Architektur**.
+Das Projekt befindet sich in **Phase 1 – Lokaler MVP**.
 
 ### ✅ Abgeschlossen
 
@@ -15,10 +15,12 @@ Das Projekt befindet sich in **Phase 0 - Planung & Architektur**.
 - GitHub Actions CI/CD Workflow für Windows und Linux
 - Shared Library Grundstruktur
 - `.gitignore` für C++/CMake Projekte
+- Client lauffähig unter Windows und Linux
+- Dynamisches Chunksystem
 
 ### 🚧 In Arbeit
 
-- Client, Server und Master Module müssen noch erstellt werden
+- Client, Server und Master Module ausarbeiten
 
 ## 📁 Projektstruktur
 
