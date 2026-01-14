@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cmath>
+#include <functional>
 
 namespace BrickWorlds {
 namespace Core {
