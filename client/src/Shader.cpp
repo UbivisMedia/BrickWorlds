@@ -8,7 +8,7 @@
 #include <GL/gl.h>
 #endif
 
-// OpenGL 2.0+ function pointers (need to be loaded)
+// OpenGL 2.0+ function pointers
 #ifndef GL_COMPILE_STATUS
 #define GL_COMPILE_STATUS 0x8B81
 #endif
@@ -22,23 +22,61 @@
 #define GL_VERTEX_SHADER 0x8B31
 #endif
 
-// Function pointer types
-typedef unsigned int (*PFNGLCREATESHADERPROC)(unsigned int);
-typedef void (*PFNGLSHADERSOURCEPROC)(unsigned int, int, const char**, const int*);
-typedef void (*PFNGLCOMPILESHADERPROC)(unsigned int);
-typedef void (*PFNGLGETSHADERIVPROC)(unsigned int, unsigned int, int*);
-typedef void (*PFNGLGETSHADERINFOLOGPROC)(unsigned int, int, int*, char*);
-typedef unsigned int (*PFNGLCREATEPROGRAMPROC)(void);
-typedef void (*PFNGLATTACHSHADERPROC)(unsigned int, unsigned int);
-typedef void (*PFNGLLINKPROGRAMPROC)(unsigned int);
-typedef void (*PFNGLGETPROGRAMIVPROC)(unsigned int, unsigned int, int*);
-typedef void (*PFNGLGETPROGRAMINFOLOGPROC)(unsigned int, int, int*, char*);
-typedef void (*PFNGLUSEPROGRAMPROC)(unsigned int);
-typedef void (*PFNGLDELETESHADERPROC)(unsigned int);
-typedef int (*PFNGLGETUNIFORMLOCATIONPROC)(unsigned int, const char*);
-typedef void (*PFNGLUNIFORMMATRIX4FVPROC)(int, int, unsigned char, const float*);
-typedef void (*PFNGLUNIFORM3FPROC)(int, float, float, float);
-typedef void (*PFNGLUNIFORM1IPROC)(int, int);
+// Only declare if not already defined by GL headers
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
+// Use existing types from glext.h if available, otherwise define our own
+#ifndef PFNGLCREATESHADERPROC
+typedef unsigned int (APIENTRY* PFNGLCREATESHADERPROC)(unsigned int);
+#endif
+#ifndef PFNGLSHADERSOURCEPROC
+typedef void (APIENTRY* PFNGLSHADERSOURCEPROC)(unsigned int, int, const char**, const int*);
+#endif
+#ifndef PFNGLCOMPILESHADERPROC
+typedef void (APIENTRY* PFNGLCOMPILESHADERPROC)(unsigned int);
+#endif
+#ifndef PFNGLGETSHADERIVPROC
+typedef void (APIENTRY* PFNGLGETSHADERIVPROC)(unsigned int, unsigned int, int*);
+#endif
+#ifndef PFNGLGETSHADERINFOLOGPROC
+typedef void (APIENTRY* PFNGLGETSHADERINFOLOGPROC)(unsigned int, int, int*, char*);
+#endif
+#ifndef PFNGLCREATEPROGRAMPROC
+typedef unsigned int (APIENTRY* PFNGLCREATEPROGRAMPROC)(void);
+#endif
+#ifndef PFNGLATTACHSHADERPROC
+typedef void (APIENTRY* PFNGLATTACHSHADERPROC)(unsigned int, unsigned int);
+#endif
+#ifndef PFNGLLINKPROGRAMPROC
+typedef void (APIENTRY* PFNGLLINKPROGRAMPROC)(unsigned int);
+#endif
+#ifndef PFNGLGETPROGRAMIVPROC
+typedef void (APIENTRY* PFNGLGETPROGRAMIVPROC)(unsigned int, unsigned int, int*);
+#endif
+#ifndef PFNGLGETPROGRAMINFOLOGPROC
+typedef void (APIENTRY* PFNGLGETPROGRAMINFOLOGPROC)(unsigned int, int, int*, char*);
+#endif
+#ifndef PFNGLUSEPROGRAMPROC
+typedef void (APIENTRY* PFNGLUSEPROGRAMPROC)(unsigned int);
+#endif
+#ifndef PFNGLDELETESHADERPROC
+typedef void (APIENTRY* PFNGLDELETESHADERPROC)(unsigned int);
+#endif
+#ifndef PFNGLGETUNIFORMLOCATIONPROC
+typedef int (APIENTRY* PFNGLGETUNIFORMLOCATIONPROC)(unsigned int, const char*);
+#endif
+#ifndef PFNGLUNIFORMMATRIX4FVPROC
+typedef void (APIENTRY* PFNGLUNIFORMMATRIX4FVPROC)(int, int, unsigned char, const float*);
+#endif
+#ifndef PFNGLUNIFORM3FPROC
+typedef void (APIENTRY* PFNGLUNIFORM3FPROC)(int, float, float, float);
+#endif
+#ifndef PFNGLUNIFORM1IPROC
+typedef void (APIENTRY* PFNGLUNIFORM1IPROC)(int, int);
+#endif
+
 
 // Global function pointers
 static PFNGLCREATESHADERPROC glCreateShader = nullptr;

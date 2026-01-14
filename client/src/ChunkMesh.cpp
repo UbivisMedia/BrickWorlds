@@ -10,13 +10,31 @@
 #endif
 
 // OpenGL function pointers
-typedef void (*PFNGLGENVERTEXARRAYSPROC)(int, unsigned int*);
-typedef void (*PFNGLBINDVERTEXARRAYPROC)(unsigned int);
-typedef void (*PFNGLGENBUFFERSPROC)(int, unsigned int*);
-typedef void (*PFNGLBINDBUFFERPROC)(unsigned int, unsigned int);
-typedef void (*PFNGLBUFFERDATAPROC)(unsigned int, ptrdiff_t, const void*, unsigned int);
-typedef void (*PFNGLENABLEVERTEXATTRIBARRAYPROC)(unsigned int);
-typedef void (*PFNGLVERTEXATTRIBPOINTERPROC)(unsigned int, int, unsigned int, unsigned char, int, const void*);
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
+#ifndef PFNGLGENVERTEXARRAYSPROC
+typedef void (APIENTRY* PFNGLGENVERTEXARRAYSPROC)(int, unsigned int*);
+#endif
+#ifndef PFNGLBINDVERTEXARRAYPROC
+typedef void (APIENTRY* PFNGLBINDVERTEXARRAYPROC)(unsigned int);
+#endif
+#ifndef PFNGLGENBUFFERSPROC
+typedef void (APIENTRY* PFNGLGENBUFFERSPROC)(int, unsigned int*);
+#endif
+#ifndef PFNGLBINDBUFFERPROC
+typedef void (APIENTRY* PFNGLBINDBUFFERPROC)(unsigned int, unsigned int);
+#endif
+#ifndef PFNGLBUFFERDATAPROC
+typedef void (APIENTRY* PFNGLBUFFERDATAPROC)(unsigned int, ptrdiff_t, const void*, unsigned int);
+#endif
+#ifndef PFNGLENABLEVERTEXATTRIBARRAYPROC
+typedef void (APIENTRY* PFNGLENABLEVERTEXATTRIBARRAYPROC)(unsigned int);
+#endif
+#ifndef PFNGLVERTEXATTRIBPOINTERPROC
+typedef void (APIENTRY* PFNGLVERTEXATTRIBPOINTERPROC)(unsigned int, int, unsigned int, unsigned char, int, const void*);
+#endif
 
 #ifndef GL_ARRAY_BUFFER
 #define GL_ARRAY_BUFFER 0x8892
@@ -27,6 +45,7 @@ typedef void (*PFNGLVERTEXATTRIBPOINTERPROC)(unsigned int, int, unsigned int, un
 #ifndef GL_FLOAT
 #define GL_FLOAT 0x1406
 #endif
+
 
 static PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = nullptr;
 static PFNGLBINDVERTEXARRAYPROC glBindVertexArray = nullptr;
