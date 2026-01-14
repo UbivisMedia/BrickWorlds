@@ -1,0 +1,30 @@
+{
+  "id": 1,
+  "name": "dirt",
+  "displayName": "Dirt",
+  "description": "Basic dirt block",
+  "hardness": 0.5,
+  "breakTime": 0.75,
+  "drops": [
+    {
+      "itemId": 1,
+      "chance": 1.0,
+      "count": 1
+    }
+  ],
+  "render": {
+    "type": "cube",
+    "texture": {
+      "top": "dirt",
+      "bottom": "dirt",
+      "sides": "dirt"
+    },
+    "color": [139, 90, 43]
+  },
+  "physics": {
+    "solid": true,
+    "collidable": true,
+    "gravity": false
+  },
+  "tags": ["ground", "natural"]
+}
