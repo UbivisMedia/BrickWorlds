@@ -14,15 +14,20 @@ if(NOT GLEW_FOUND)
     )
     
     set(BUILD_UTILS OFF CACHE BOOL "" FORCE)
+    set(glew-cmake_BUILD_SHARED OFF CACHE BOOL "" FORCE)
     
     FetchContent_GetProperties(glew)
     if(NOT glew_POPULATED)
         FetchContent_Populate(glew)
-        add_subdirectory(${glew_SOURCE_DIR}/build/cmake ${glew_BINARY_DIR})
+        add_subdirectory(${glew_SOURCE_DIR}/build/cmake ${glew_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif()
     
-    # Set GLEW targets
-    add_library(GLEW::GLEW ALIAS glew_s)
+    # Create alias
+    if(TARGET glew_s)
+        add_library(GLEW::GLEW ALIAS glew_s)
+    elseif(TARGET libglew_static)
+        add_library(GLEW::GLEW ALIAS libglew_static)
+    endif()
 endif()
 
 # Find or fetch GLFW
@@ -41,10 +46,18 @@ if(NOT glfw3_FOUND)
     FetchContent_MakeAvailable(glfw)
 endif()
 
+# Collect source files
 file(GLOB_RECURSE CLIENT_SOURCES "src/*.cpp")
 
+# Create executable - ERST JETZT!
 add_executable(${PROJECT_NAME} ${CLIENT_SOURCES})
 
+# NOW we can add include directories (target exists!)
+if(NOT GLEW_FOUND AND glew_SOURCE_DIR)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${glew_SOURCE_DIR}/include)
+endif()
+
+# Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     BrickWorlds_Shared 
     OpenGL::GL
@@ -52,6 +65,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     glfw
 )
 
+# Set properties
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
@@ -59,4 +73,3 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 message(STATUS "Configured Client executable")
-
