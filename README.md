@@ -2,6 +2,8 @@
 
 **MMO Minecraft Clone** - Ein massiv-mehrspieler Voxel-/Block-Spiel
 
+![Build Status](https://github.com/UbivisMedia/BrickWorlds/actions/workflows/build.yml/badge.svg)
+
 ## 🎯 Projektstatus
 
 Das Projekt befindet sich in **Phase 0 - Planung & Architektur**.
