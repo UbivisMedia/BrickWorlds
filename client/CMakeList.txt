@@ -1,0 +1,29 @@
+project(BrickWorlds_Client)
+
+file(GLOB_RECURSE CLIENT_SOURCES "src/*.cpp")
+
+add_executable(${PROJECT_NAME} ${CLIENT_SOURCES})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE BrickWorlds_Shared)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    OUTPUT_NAME "BrickWorlds_Client"
+)
+
+message(STATUS "Configured Client executable")
+EOF
+
+cat > client/src/main.cpp << 'EOF'
+#include <BrickWorlds/Version.h>
+#include <iostream>
+
+int main(int argc, char* argv[]) {
+    std::cout << "BrickWorlds Client v" << BrickWorlds::Version::GetVersionString() << std::endl;
+    std::cout << "Starting client..." << std::endl;
+    
+    // TODO: Initialize client
+    
+    return 0;
+}
