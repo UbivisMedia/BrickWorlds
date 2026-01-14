@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Configure CMake
       run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
@@ -25,7 +25,7 @@ jobs:
       run: cmake --build build --config ${{ matrix.build_type }}
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: BrickWorlds-${{ matrix.os }}-${{ matrix.build_type }}
         path: |
