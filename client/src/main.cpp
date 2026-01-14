@@ -1,9 +1,4 @@
 #include <BrickWorlds/Version.h>
-#include <iostream>
-
-int main(int argc, char* argv[]) {
-    std::cout << "BrickWorlds Client v" << BrickWorlds::Version::GetVersionString() << std::endl;
-#include <BrickWorlds/Version.h>
 #include <BrickWorlds/Core/World.h>
 #include <iostream>
 
@@ -38,10 +33,6 @@ int main(int argc, char* argv[]) {
     
     std::cout << "\nPhase 1 basic systems functional!" << std::endl;
     std::cout << "Next steps: Add rendering, input, and networking" << std::endl;
-    
-    return 0;
-}    
-    // TODO: Initialize client
     
     return 0;
 }
