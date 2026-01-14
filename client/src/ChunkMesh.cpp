@@ -6,6 +6,7 @@
 #include <GL/gl.h>
 #elif defined(__linux__)
 #include <GL/gl.h>
+#include <GL/glx.h>
 #endif
 
 // OpenGL function pointers
@@ -13,7 +14,7 @@ typedef void (*PFNGLGENVERTEXARRAYSPROC)(int, unsigned int*);
 typedef void (*PFNGLBINDVERTEXARRAYPROC)(unsigned int);
 typedef void (*PFNGLGENBUFFERSPROC)(int, unsigned int*);
 typedef void (*PFNGLBINDBUFFERPROC)(unsigned int, unsigned int);
-typedef void (*PFNGLBUFFERDATAPROC)(unsigned int, long long, const void*, unsigned int);
+typedef void (*PFNGLBUFFERDATAPROC)(unsigned int, ptrdiff_t, const void*, unsigned int);
 typedef void (*PFNGLENABLEVERTEXATTRIBARRAYPROC)(unsigned int);
 typedef void (*PFNGLVERTEXATTRIBPOINTERPROC)(unsigned int, int, unsigned int, unsigned char, int, const void*);
 

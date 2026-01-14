@@ -6,6 +6,7 @@
 #include <GL/gl.h>
 #elif defined(__linux__)
 #include <GL/gl.h>
+#include <GL/glx.h>
 #endif
 
 // Embedded shaders
