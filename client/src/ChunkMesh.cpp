@@ -126,7 +126,7 @@ void ChunkMesh::generate(const BrickWorlds::Voxel::World& world,
             return chunkPlusZ->Get(lx, ly, 0) == Air;
         }
         // Unloaded chunk = treat as air
-        return true;
+        return false;
     };
 
     // Iterate through all blocks in chunk
