@@ -111,19 +111,20 @@ void ChunkMesh::generate(const BrickWorlds::Voxel::World& world,
         }
 
         // Check neighbor chunks directly (no HashMap lookup!)
-        if (lx < 0 && chunkMinusX) {
+        // Check neighbor chunks directly (no HashMap lookup!)
+        // Only check ONE axis at a time - others must be in valid range!
+        if (lx < 0 && lz >= 0 && lz < ChunkZ && chunkMinusX) {
             return chunkMinusX->Get(ChunkX - 1, ly, lz) == Air;
         }
-        if (lx >= ChunkX && chunkPlusX) {
+        if (lx >= ChunkX && lz >= 0 && lz < ChunkZ && chunkPlusX) {
             return chunkPlusX->Get(0, ly, lz) == Air;
         }
-        if (lz < 0 && chunkMinusZ) {
+        if (lz < 0 && lx >= 0 && lx < ChunkX && chunkMinusZ) {
             return chunkMinusZ->Get(lx, ly, ChunkZ - 1) == Air;
         }
-        if (lz >= ChunkZ && chunkPlusZ) {
+        if (lz >= ChunkZ && lx >= 0 && lx < ChunkX && chunkPlusZ) {
             return chunkPlusZ->Get(lx, ly, 0) == Air;
         }
-
         // Unloaded chunk = treat as air
         return true;
     };
