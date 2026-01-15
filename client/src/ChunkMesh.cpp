@@ -1,8 +1,10 @@
 #include "ChunkMesh.h"
-#include <iostream>
+#include <BrickWorlds/Voxel/World.h>
 #include <GL/glew.h>
 
-ChunkMesh::ChunkMesh() : m_vao(0), m_vbo(0), m_vertexCount(0) {
+using namespace BrickWorlds::Voxel;
+
+ChunkMesh::ChunkMesh() {
     glGenVertexArrays(1, &m_vao);
     glGenBuffers(1, &m_vbo);
 }
@@ -12,97 +14,116 @@ ChunkMesh::~ChunkMesh() {
     if (m_vao) glDeleteVertexArrays(1, &m_vao);
 }
 
-void ChunkMesh::getBlockColor(BrickWorlds::Core::BlockID id, float& r, float& g, float& b) {
+void ChunkMesh::getBlockColor(BlockId id, float& r, float& g, float& b) {
     switch (id) {
-    case BrickWorlds::Core::BLOCK_DIRT:
-        r = 0.55f; g = 0.35f; b = 0.17f; break;
-    case BrickWorlds::Core::BLOCK_STONE:
-        r = 0.5f; g = 0.5f; b = 0.5f; break;
-    case BrickWorlds::Core::BLOCK_WATER:
-        r = 0.2f; g = 0.4f; b = 0.8f; break;
-    case BrickWorlds::Core::BLOCK_WOOD:
-        r = 0.4f; g = 0.25f; b = 0.1f; break;
-    default:
-        r = 1.0f; g = 0.0f; b = 1.0f;
+    case Dirt:  r = 0.55f; g = 0.35f; b = 0.17f; break;
+    case Rock:  r = 0.50f; g = 0.50f; b = 0.50f; break;
+    case Water: r = 0.20f; g = 0.40f; b = 0.80f; break;
+    default:    r = 1.00f; g = 0.00f; b = 1.00f; break;
     }
 }
 
-void ChunkMesh::addCube(float x, float y, float z, float r, float g, float b, std::vector<Vertex>& vertices) {
-    // Front face
-    vertices.push_back({ {x, y, z + 1}, {r, g, b} });
-    vertices.push_back({ {x + 1, y, z + 1}, {r, g, b} });
-    vertices.push_back({ {x + 1, y + 1, z + 1}, {r, g, b} });
-    vertices.push_back({ {x, y, z + 1}, {r, g, b} });
-    vertices.push_back({ {x + 1, y + 1, z + 1}, {r, g, b} });
-    vertices.push_back({ {x, y + 1, z + 1}, {r, g, b} });
+void ChunkMesh::addFace(int face, float x, float y, float z, float r, float g, float b, std::vector<Vertex>& v) {
+    auto push = [&](float px, float py, float pz, float cr, float cg, float cb) {
+        v.push_back({ {px, py, pz}, {cr, cg, cb} });
+        };
 
-    // Back face
-    vertices.push_back({ {x + 1, y, z}, {r * 0.7f, g * 0.7f, b * 0.7f} });
-    vertices.push_back({ {x, y, z}, {r * 0.7f, g * 0.7f, b * 0.7f} });
-    vertices.push_back({ {x, y + 1, z}, {r * 0.7f, g * 0.7f, b * 0.7f} });
-    vertices.push_back({ {x + 1, y, z}, {r * 0.7f, g * 0.7f, b * 0.7f} });
-    vertices.push_back({ {x, y + 1, z}, {r * 0.7f, g * 0.7f, b * 0.7f} });
-    vertices.push_back({ {x + 1, y + 1, z}, {r * 0.7f, g * 0.7f, b * 0.7f} });
+    switch (face) {
+    case 0: // +Z
+        push(x, y, z + 1, r, g, b);
+        push(x + 1, y, z + 1, r, g, b);
+        push(x + 1, y + 1, z + 1, r, g, b);
+        push(x, y, z + 1, r, g, b);
+        push(x + 1, y + 1, z + 1, r, g, b);
+        push(x, y + 1, z + 1, r, g, b);
+        break;
 
-    // Top face
-    vertices.push_back({ {x, y + 1, z + 1}, {r * 0.9f, g * 0.9f, b * 0.9f} });
-    vertices.push_back({ {x + 1, y + 1, z + 1}, {r * 0.9f, g * 0.9f, b * 0.9f} });
-    vertices.push_back({ {x + 1, y + 1, z}, {r * 0.9f, g * 0.9f, b * 0.9f} });
-    vertices.push_back({ {x, y + 1, z + 1}, {r * 0.9f, g * 0.9f, b * 0.9f} });
-    vertices.push_back({ {x + 1, y + 1, z}, {r * 0.9f, g * 0.9f, b * 0.9f} });
-    vertices.push_back({ {x, y + 1, z}, {r * 0.9f, g * 0.9f, b * 0.9f} });
+    case 1: // -Z (dunkler)
+        push(x + 1, y, z, r * 0.7f, g * 0.7f, b * 0.7f);
+        push(x, y, z, r * 0.7f, g * 0.7f, b * 0.7f);
+        push(x, y + 1, z, r * 0.7f, g * 0.7f, b * 0.7f);
+        push(x + 1, y, z, r * 0.7f, g * 0.7f, b * 0.7f);
+        push(x, y + 1, z, r * 0.7f, g * 0.7f, b * 0.7f);
+        push(x + 1, y + 1, z, r * 0.7f, g * 0.7f, b * 0.7f);
+        break;
 
-    // Bottom face
-    vertices.push_back({ {x, y, z}, {r * 0.5f, g * 0.5f, b * 0.5f} });
-    vertices.push_back({ {x + 1, y, z}, {r * 0.5f, g * 0.5f, b * 0.5f} });
-    vertices.push_back({ {x + 1, y, z + 1}, {r * 0.5f, g * 0.5f, b * 0.5f} });
-    vertices.push_back({ {x, y, z}, {r * 0.5f, g * 0.5f, b * 0.5f} });
-    vertices.push_back({ {x + 1, y, z + 1}, {r * 0.5f, g * 0.5f, b * 0.5f} });
-    vertices.push_back({ {x, y, z + 1}, {r * 0.5f, g * 0.5f, b * 0.5f} });
+    case 2: // +Y (leicht heller)
+        push(x, y + 1, z + 1, r * 0.9f, g * 0.9f, b * 0.9f);
+        push(x + 1, y + 1, z + 1, r * 0.9f, g * 0.9f, b * 0.9f);
+        push(x + 1, y + 1, z, r * 0.9f, g * 0.9f, b * 0.9f);
+        push(x, y + 1, z + 1, r * 0.9f, g * 0.9f, b * 0.9f);
+        push(x + 1, y + 1, z, r * 0.9f, g * 0.9f, b * 0.9f);
+        push(x, y + 1, z, r * 0.9f, g * 0.9f, b * 0.9f);
+        break;
 
-    // Right face
-    vertices.push_back({ {x + 1, y, z + 1}, {r * 0.8f, g * 0.8f, b * 0.8f} });
-    vertices.push_back({ {x + 1, y, z}, {r * 0.8f, g * 0.8f, b * 0.8f} });
-    vertices.push_back({ {x + 1, y + 1, z}, {r * 0.8f, g * 0.8f, b * 0.8f} });
-    vertices.push_back({ {x + 1, y, z + 1}, {r * 0.8f, g * 0.8f, b * 0.8f} });
-    vertices.push_back({ {x + 1, y + 1, z}, {r * 0.8f, g * 0.8f, b * 0.8f} });
-    vertices.push_back({ {x + 1, y + 1, z + 1}, {r * 0.8f, g * 0.8f, b * 0.8f} });
+    case 3: // -Y (dunkler)
+        push(x, y, z, r * 0.5f, g * 0.5f, b * 0.5f);
+        push(x + 1, y, z, r * 0.5f, g * 0.5f, b * 0.5f);
+        push(x + 1, y, z + 1, r * 0.5f, g * 0.5f, b * 0.5f);
+        push(x, y, z, r * 0.5f, g * 0.5f, b * 0.5f);
+        push(x + 1, y, z + 1, r * 0.5f, g * 0.5f, b * 0.5f);
+        push(x, y, z + 1, r * 0.5f, g * 0.5f, b * 0.5f);
+        break;
 
-    // Left face
-    vertices.push_back({ {x, y, z}, {r * 0.6f, g * 0.6f, b * 0.6f} });
-    vertices.push_back({ {x, y, z + 1}, {r * 0.6f, g * 0.6f, b * 0.6f} });
-    vertices.push_back({ {x, y + 1, z + 1}, {r * 0.6f, g * 0.6f, b * 0.6f} });
-    vertices.push_back({ {x, y, z}, {r * 0.6f, g * 0.6f, b * 0.6f} });
-    vertices.push_back({ {x, y + 1, z + 1}, {r * 0.6f, g * 0.6f, b * 0.6f} });
-    vertices.push_back({ {x, y + 1, z}, {r * 0.6f, g * 0.6f, b * 0.6f} });
+    case 4: // +X
+        push(x + 1, y, z + 1, r * 0.8f, g * 0.8f, b * 0.8f);
+        push(x + 1, y, z, r * 0.8f, g * 0.8f, b * 0.8f);
+        push(x + 1, y + 1, z, r * 0.8f, g * 0.8f, b * 0.8f);
+        push(x + 1, y, z + 1, r * 0.8f, g * 0.8f, b * 0.8f);
+        push(x + 1, y + 1, z, r * 0.8f, g * 0.8f, b * 0.8f);
+        push(x + 1, y + 1, z + 1, r * 0.8f, g * 0.8f, b * 0.8f);
+        break;
+
+    case 5: // -X
+        push(x, y, z, r * 0.6f, g * 0.6f, b * 0.6f);
+        push(x, y, z + 1, r * 0.6f, g * 0.6f, b * 0.6f);
+        push(x, y + 1, z + 1, r * 0.6f, g * 0.6f, b * 0.6f);
+        push(x, y, z, r * 0.6f, g * 0.6f, b * 0.6f);
+        push(x, y + 1, z + 1, r * 0.6f, g * 0.6f, b * 0.6f);
+        push(x, y + 1, z, r * 0.6f, g * 0.6f, b * 0.6f);
+        break;
+
+    default: break;
+    }
 }
 
-void ChunkMesh::generate(const BrickWorlds::Core::Chunk& chunk) {
+void ChunkMesh::generate(const BrickWorlds::Voxel::World& world,
+    const BrickWorlds::Voxel::Chunk& chunk)
+{
+    using namespace BrickWorlds::Voxel;
+
     std::vector<Vertex> vertices;
+    vertices.reserve(20000);
 
-    using namespace BrickWorlds::Core;
+    const auto& key = chunk.Key();
+    const int baseX = key.cx * ChunkX;
+    const int baseZ = key.cz * ChunkZ;
 
-    for (int x = 0; x < CHUNK_SIZE; x++) {
-        for (int y = 0; y < CHUNK_SIZE; y++) {
-            for (int z = 0; z < CHUNK_HEIGHT; z++) {
-                BlockID id = chunk.getBlock(x, y, z);
-                if (id == BLOCK_AIR) continue;
+    for (int lx = 0; lx < ChunkX; ++lx) {
+        for (int lz = 0; lz < ChunkZ; ++lz) {
+            for (int y = 0; y < ChunkY; ++y) {
+
+                const int wx = baseX + lx;
+                const int wz = baseZ + lz;
+
+                BlockId id = world.GetBlock(wx, y, wz);
+                if (id == Air) continue;
 
                 float r, g, b;
                 getBlockColor(id, r, g, b);
 
-                Vector3i chunkPos = chunk.getPosition();
-                float worldX = static_cast<float>(chunkPos.x * CHUNK_SIZE + x);
-                float worldY = static_cast<float>(chunkPos.y * CHUNK_SIZE + y);
-                float worldZ = static_cast<float>(chunkPos.z * CHUNK_HEIGHT + z);
-
-                addCube(worldX, worldY, worldZ, r, g, b, vertices);
+                // Faces nur wenn Nachbar AIR ist (über Chunk-Grenzen hinweg)
+                if (world.GetBlock(wx, y, wz + 1) == Air) addFace(0, (float)wx, (float)y, (float)wz, r, g, b, vertices);
+                if (world.GetBlock(wx, y, wz - 1) == Air) addFace(1, (float)wx, (float)y, (float)wz, r, g, b, vertices);
+                if (world.GetBlock(wx, y + 1, wz) == Air) addFace(2, (float)wx, (float)y, (float)wz, r, g, b, vertices);
+                if (world.GetBlock(wx, y - 1, wz) == Air) addFace(3, (float)wx, (float)y, (float)wz, r, g, b, vertices);
+                if (world.GetBlock(wx + 1, y, wz) == Air) addFace(4, (float)wx, (float)y, (float)wz, r, g, b, vertices);
+                if (world.GetBlock(wx - 1, y, wz) == Air) addFace(5, (float)wx, (float)y, (float)wz, r, g, b, vertices);
             }
         }
     }
 
-    m_vertexCount = static_cast<int>(vertices.size());
-
+    m_vertexCount = (int)vertices.size();
     if (m_vertexCount == 0) return;
 
     glBindVertexArray(m_vao);
@@ -118,9 +139,9 @@ void ChunkMesh::generate(const BrickWorlds::Core::Chunk& chunk) {
     glBindVertexArray(0);
 }
 
+
 void ChunkMesh::render() const {
     if (m_vertexCount == 0) return;
-
     glBindVertexArray(m_vao);
     glDrawArrays(GL_TRIANGLES, 0, m_vertexCount);
     glBindVertexArray(0);

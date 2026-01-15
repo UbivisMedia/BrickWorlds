@@ -1,12 +1,14 @@
 #include <BrickWorlds/Version.h>
-#include <BrickWorlds/Core/World.h>
+#include <BrickWorlds/Voxel/World.h>
+#include <BrickWorlds/Voxel/FlatGenerator.h>
+#include <BrickWorlds/Voxel/BlockId.h>
 #include "Camera.h"
 #include "Renderer.h"
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-using namespace BrickWorlds::Core;
+using namespace BrickWorlds::Voxel;
 
 struct InputState {
     bool keys[512] = { false };
@@ -70,11 +72,11 @@ void processInput(Camera& camera, float deltaTime) {
         moved = true;
     }
     if (g_input.keys[GLFW_KEY_SPACE]) {
-        camera.move(Vector3f(0.0f, moveSpeed, 0.0f));
+        camera.move(BrickWorlds::Core::Vector3f(0.0f, moveSpeed, 0.0f));
         moved = true;
     }
     if (g_input.keys[GLFW_KEY_LEFT_SHIFT]) {
-        camera.move(Vector3f(0.0f, -moveSpeed, 0.0f));
+        camera.move(BrickWorlds::Core::Vector3f(0.0f, -moveSpeed, 0.0f));
         moved = true;
     }
 
@@ -124,10 +126,14 @@ int main(int argc, char* argv[]) {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    World world;
-    std::cout << "Generating flat test world..." << std::endl;
-    world.generateFlatWorld(4, 4);
-    std::cout << "World generated with " << world.getChunks().size() << " chunks" << std::endl;
+    FlatGenerator generator;
+    World world(&generator);
+
+    // 1 Gen-Thread, 1 Mesh-Thread (Mesh ist zunächst Stub/CPU-Mesh, je nachdem wie du es umgesetzt hast)
+    world.StartStreaming(1, 1);
+
+    std::cout << "Starting chunk streaming..." << std::endl;
+
 
     Renderer renderer;
     if (!renderer.initialize()) {
@@ -137,7 +143,7 @@ int main(int argc, char* argv[]) {
     }
 
     Camera camera(70.0f, 1280.0f / 720.0f);
-    camera.setPosition(Vector3f(32.0f, 20.0f, 50.0f));
+    camera.setPosition(BrickWorlds::Core::Vector3f(32.0f, 20.0f, 50.0f));
     camera.setRotation(0.0f, 180.0f);  // Geradeaus schauen
 
     std::cout << "\nControls:" << std::endl;
@@ -202,6 +208,13 @@ int main(int argc, char* argv[]) {
         lastTime = currentTime;
 
         processInput(camera, deltaTime);
+        auto pos = camera.getPosition();
+        int playerWx = static_cast<int>(pos.x);
+        int playerWz = static_cast<int>(pos.z);
+
+        // viewDistanceChunks: erstmal klein starten (z.B. 4-6)
+        world.UpdateStreaming(playerWx, playerWz, 6);
+
         renderer.render(world, camera);
 
         glfwSwapBuffers(window);
@@ -211,7 +224,7 @@ int main(int argc, char* argv[]) {
 
 
 
-
+    world.StopStreaming();
     glfwDestroyWindow(window);
     glfwTerminate();
 

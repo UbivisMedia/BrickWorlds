@@ -1,15 +1,14 @@
 # Shared library - Common code for all components
-
 project(BrickWorlds_Shared)
 
 # Collect all source files
 file(GLOB_RECURSE SHARED_SOURCES
-    "src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
 
 file(GLOB_RECURSE SHARED_HEADERS
-    "include/*.h"
-    "include/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
 )
 
 # Create shared library
