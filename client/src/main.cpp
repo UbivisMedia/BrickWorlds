@@ -52,7 +52,7 @@ static void mouse_callback(GLFWwindow*, double xpos, double ypos) {
 
 
 void processInput(Camera& camera, float deltaTime) {
-    float moveSpeed = 15.0f * deltaTime;  // Erhöht von 10.0f auf 15.0f
+    float moveSpeed = 15.0f * deltaTime;  // ErhÃ¶ht von 10.0f auf 15.0f
     bool moved = false;
 
     if (g_input.keys[GLFW_KEY_W]) {
@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
     FlatGenerator generator;
     World world(&generator);
 
-    // 1 Gen-Thread, 1 Mesh-Thread (Mesh ist zunächst Stub/CPU-Mesh, je nachdem wie du es umgesetzt hast)
+    // 1 Gen-Thread, 1 Mesh-Thread (Mesh ist zunÃ¤chst Stub/CPU-Mesh, je nachdem wie du es umgesetzt hast)
     world.StartStreaming(1, 1);
 
     std::cout << "Starting chunk streaming..." << std::endl;
@@ -143,9 +143,8 @@ int main(int argc, char* argv[]) {
     }
 
     Camera camera(70.0f, 1280.0f / 720.0f);
-    camera.setPosition(BrickWorlds::Core::Vector3f(32.0f, 20.0f, 50.0f));
+    camera.setPosition(BrickWorlds::Core::Vector3f(32.0f, 62.0f, 50.0f));  // Spawn above surface (y=60)
     camera.setRotation(0.0f, 180.0f);  // Geradeaus schauen
-
     std::cout << "\nControls:" << std::endl;
     std::cout << "  WASD - Move" << std::endl;
     std::cout << "  Mouse - Look around" << std::endl;
@@ -176,7 +175,7 @@ int main(int argc, char* argv[]) {
         };
 
     // Callback setzen mit std::function Wrapper
-    // Für C-API müssen wir einen Workaround machen
+    // FÃ¼r C-API mÃ¼ssen wir einen Workaround machen
     glfwSetWindowUserPointer(window, &camera);
     glfwSetCursorPosCallback(window, [](GLFWwindow* win, double xpos, double ypos) {
         Camera* cam = static_cast<Camera*>(glfwGetWindowUserPointer(win));
