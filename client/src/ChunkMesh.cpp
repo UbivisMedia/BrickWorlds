@@ -125,11 +125,8 @@ void ChunkMesh::generate(const BrickWorlds::Voxel::World& world,
         if (lz >= ChunkZ && lx >= 0 && lx < ChunkX && chunkPlusZ) {
             return chunkPlusZ->Get(lx, ly, 0) == Air;
         }
-        // Unloaded chunk = treat as air
-        return true;
-    };
-
-    // Iterate through all blocks in chunk
+        // Unloaded chunk = treat as solid (render face)      
+                return false;k
     for (int lx = 0; lx < ChunkX; ++lx) {
         for (int lz = 0; lz < ChunkZ; ++lz) {
             for (int y = 0; y < ChunkY; ++y) {
